@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Forge Macro | Ultimate Automation Tool</title>
+    <style>
+        /* --- CORE SETTINGS --- */
+        :root {
+            --bg-deep: #050505;
+            --bg-panel: #0f0f12;
+            --primary: #ff4d00;
+            --primary-glow: rgba(255, 77, 0, 0.6);
+            --accent: #ff9100;
+            --text-white: #ffffff;
+            --text-gray: #8f9bb3;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-white);
+            font-family: var(--font-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* --- BACKGROUND FX --- */
+        #ember-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* --- NAVIGATION --- */
+        nav {
+            position: fixed;
+            top: 0; width: 100%;
+            padding: 20px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+        }
+
+        .brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .brand span { color: var(--primary); text-shadow: 0 0 15px var(--primary-glow); }
+
+        .nav-links { display: flex; gap: 30px; align-items: center; }
+        .nav-links a {
+            color: var(--text-gray);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+        .nav-links a:hover { color: var(--text-white); }
+
+        .cta-small {
+            background: var(--primary);
+            color: white !important;
+            padding: 8px 20px;
+            border-radius: 4px;
+            font-weight: 700 !important;
+            box-shadow: 0 0 20px rgba(255, 77, 0, 0.3);
+        }
+        .cta-small:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(255, 77, 0, 0.5); }
+
+        /* --- HERO SECTION (Split Layout) --- */
+        header {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 120px 10% 50px;
+            position: relative;
+            perspective: 1000px; /* 3D context */
+        }
+
+        .hero-content {
+            flex: 1;
+            max-width: 600px;
+            z-index: 2;
+        }
+
+        .hero-visual {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            font-size: 4.5rem;
+            line-height: 1.1;
+            font-weight: 900;
+            margin-bottom: 25px;
+            background: linear-gradient(135deg, #fff 0%, #aaa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h1 span {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(255, 77, 0, 0.3);
+        }
+
+        p.subtitle {
+            font-size: 1.1rem;
+            color: var(--text-gray);
+            margin-bottom: 40px;
+            max-width: 480px;
+        }
+
+        .btn-group { display: flex; gap: 20px; }
+
+        .btn {
+            padding: 16px 32px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-main {
+            background: linear-gradient(90deg, var(--primary), #e04400);
+            color: white;
+            box-shadow: 0 10px 30px rgba(255, 77, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Shimmer Effect on Button */
+        .btn-main::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: skewX(-20deg);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer { 100% { left: 200%; } }
+
+        .btn-main:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(255, 77, 0, 0.4); }
+
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+        }
+        .btn-ghost:hover { border-color: white; background: rgba(255,255,255,0.05); }
+
+        /* --- THE FAKE SOFTWARE UI (CSS ART) --- */
+        .app-mockup {
+            width: 450px;
+            height: 320px;
+            background: #121215;
+            border: 1px solid #333;
+            border-radius: 12px;
+            box-shadow: 0 20px 80px rgba(0,0,0,0.6);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out; /* Smooth tilt */
+        }
+
+        /* Glowing Border around app */
+        .app-mockup::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: linear-gradient(45deg, var(--primary), transparent, var(--accent), transparent);
+            z-index: -1;
+            border-radius: 14px;
+            filter: blur(10px);
+            opacity: 0.6;
+        }
+
+        .app-header {
+            height: 40px;
+            background: #1a1a1f;
+            border-bottom: 1px solid #2a2a2f;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            gap: 8px;
+        }
+
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
+        .red { background: #ff5f56; }
+        .yellow { background: #ffbd2e; }
+        .green { background: #27c93f; }
+
+        .app-body {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        /* The Animated Core in the Mockup */
+        .forge-core {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ff4d00 0%, #330d00 70%);
+            box-shadow: 0 0 30px var(--primary);
+            position: relative;
+            animation: pulse-core 2s infinite ease-in-out;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .core-text { font-size: 10px; color: white; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+
+        @keyframes pulse-core {
+            0% { box-shadow: 0 0 20px var(--primary); transform: scale(0.95); }
+            50% { box-shadow: 0 0 50px var(--primary), inset 0 0 20px #ff9100; transform: scale(1.05); }
+            100% { box-shadow: 0 0 20px var(--primary); transform: scale(0.95); }
+        }
+
+        .app-status {
+            font-family: monospace;
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        /* --- FEATURES GRID --- */
+        .section-features {
+            padding: 100px 10%;
+            background: radial-gradient(circle at 50% 0%, #1a0a05 0%, var(--bg-deep) 60%);
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+        .section-title h2 { font-size: 2.5rem; text-transform: uppercase; margin-bottom: 10px; }
+        .section-title span { color: var(--primary); }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            padding: 40px;
+            border-radius: 16px;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+            group;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(180deg, #fff, #666);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .feature-card h3 { font-size: 1.25rem; margin-bottom: 15px; color: #fff; }
+        .feature-card p { color: var(--text-gray); font-size: 0.9rem; }
+
+        /* Scroll Reveal Animation */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease-out;
+        }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        /* --- DOWNLOAD CARD --- */
+        .dl-section {
+            padding: 100px 5%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .dl-card {
+            background: linear-gradient(145deg, #131316, #0d0d10);
+            width: 100%;
+            max-width: 900px;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            padding: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dl-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        .dl-info h3 { font-size: 2rem; margin-bottom: 10px; }
+        .dl-info p { color: var(--text-gray); max-width: 400px; }
+        
+        .version-badge {
+            background: rgba(255, 77, 0, 0.1);
+            color: var(--primary);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            header { flex-direction: column-reverse; text-align: center; padding-top: 100px; }
+            .hero-visual { margin-bottom: 50px; }
+            .dl-card { flex-direction: column; text-align: center; gap: 30px; }
+            .btn-group { justify-content: center; }
+            h1 { font-size: 3rem; }
+            .app-mockup { width: 100%; max-width: 400px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Particle Background -->
+    <canvas id="ember-canvas"></canvas>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="brand">THE <span>FORGE</span></div>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#security">Security</a>
+            <a href="#download" class="cta-small">Get Started</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header id="home">
+        <div class="hero-content">
+            <h1 class="reveal active">Forged for <br><span>Perfection</span></h1>
+            <p class="subtitle reveal active" style="transition-delay: 0.1s">
+                The most advanced macro automation software tailored for professional gamers. 
+                Undetectable, lightweight, and incredibly powerful.
+            </p>
+            <div class="btn-group reveal active" style="transition-delay: 0.2s">
+                <button class="btn btn-main" onclick="document.getElementById('download').scrollIntoView()">Download Now</button>
+                <button class="btn btn-ghost">Learn More</button>
+            </div>
+        </div>
+
+        <div class="hero-visual reveal active" style="transition-delay: 0.3s">
+            <!-- Simulated Software Interface -->
+            <div class="app-mockup" id="mockup">
+                <div class="app-header">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="app-body">
+                    <div class="forge-core">
+                        <span class="core-text">ACTIVE</span>
+                    </div>
+                    <div class="app-status">> WAITING FOR INPUT...</div>
+                    <div style="width: 80%; height: 4px; background: #333; border-radius: 2px; margin-top: 20px;">
+                        <div style="width: 40%; height: 100%; background: var(--primary); border-radius: 2px; box-shadow: 0 0 10px var(--primary);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Features Section -->
+    <section id="features" class="section-features">
+        <div class="section-title reveal">
+            <h2>Why Choose <span>Forge</span>?</h2>
+            <p style="color: #666;">Engineered to give you the unfair advantage.</p>
+        </div>
+
+        <div class="grid">
+            <div class="feature-card reveal">
+                <div class="feature-icon">⚡</div>
+                <h3>Hyper-Fast Execution</h3>
+                <p>Direct memory access allows The Forge to execute commands with near-zero latency, faster than hardware macros.</p>
+            </div>
+            <div class="feature-card reveal" style="transition-delay: 0.1s;">
+                <div class="feature-icon">👻</div>
+                <h3>Humanize Algorithm</h3>
+                <p>Advanced randomization ensures your click patterns look organic and natural, bypassing heuristic detection.</p>
+            </div>
+            <div class="feature-card reveal" style="transition-delay: 0.2s;">
+                <div class="feature-icon">💎</div>
+                <h3>Cloud Sync</h3>
+                <p>Your settings follow you. Log in on any device and instantly load your custom profiles and keybinds.</p>
+            </div>
+            <div class="feature-card reveal">
+                <div class="feature-icon">🔒</div>
+                <h3>Encrypted Core</h3>
+                <p>We use military-grade encryption to protect the software integrity, ensuring maximum security for your account.</p>
+            </div>
+            <div class="feature-card reveal" style="transition-delay: 0.1s;">
+                <div class="feature-icon">🎛️</div>
+                <h3>Visual Scripting</h3>
+                <p>Don't know how to code? Use our drag-and-drop node editor to create complex logic in seconds.</p>
+            </div>
+            <div class="feature-card reveal" style="transition-delay: 0.2s;">
+                <div class="feature-icon">🎨</div>
+                <h3>Obsidian UI</h3>
+                <p>A beautiful, dark-mode interface designed to reduce eye strain during long night sessions.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Banner -->
+    <section id="download" class="dl-section">
+        <div class="dl-card reveal">
+            <div class="dl-info">
+                <span class="version-badge">v2.1.0 STABLE</span>
+                <h3>Start Your Dominance</h3>
+                <p>Join the community and elevate your gameplay today. Free for personal use.</p>
+            </div>
+            <div class="dl-action">
+                <button class="btn btn-main" style="padding: 20px 50px; font-size: 1.1rem;" onclick="simulateDL(this)">
+                    Download for Windows
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <footer style="text-align: center; padding: 40px; border-top: 1px solid #111; color: #444; font-size: 0.8rem;">
+        &copy; 2024 The Forge Macro. All rights reserved. <br>
+        Designed for educational purposes.
+    </footer>
+
+    <!-- LOGIC SCRIPTS -->
+    <script>
+        // --- 1. TILT EFFECT FOR MOCKUP ---
+        const heroSection = document.querySelector('header');
+        const mockup = document.getElementById('mockup');
+
+        heroSection.addEventListener('mousemove', (e) => {
+            const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
+            const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+            mockup.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+        });
+
+        heroSection.addEventListener('mouseleave', () => {
+            mockup.style.transform = `rotateY(0deg) rotateX(0deg)`;
+        });
+
+        // --- 2. SCROLL REVEAL ---
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // --- 3. PARTICLE SYSTEM ---
+        const canvas = document.getElementById('ember-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + Math.random() * 100;
+                this.size = Math.random() * 2 + 0.5;
+                this.speed = Math.random() * 1.5 + 0.5;
+                this.opacity = Math.random();
+            }
+            update() {
+                this.y -= this.speed;
+                this.opacity -= 0.005;
+                if (this.y < 0 || this.opacity <= 0) {
+                    this.y = canvas.height + 10;
+                    this.x = Math.random() * canvas.width;
+                    this.opacity = 1;
+                }
+            }
+            draw() {
+                ctx.fillStyle = `rgba(255, 100, 0, ${this.opacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            for(let i=0; i<60; i++) particles.push(new Particle());
+        }
+        function animateParticles() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animateParticles);
+        }
+        
+        initParticles();
+        animateParticles();
+        window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+
+        // --- 4. DOWNLOAD SIMULATION ---
+        function simulateDL(btn) {
+            let originalText = btn.innerText;
+            btn.innerText = "Connecting...";
+            btn.style.background = "#333";
+            setTimeout(() => {
+                btn.innerText = "Downloading...";
+                btn.style.background = "linear-gradient(90deg, #28a745, #5ddc7e)";
+                setTimeout(() => {
+                    alert("Download started! Welcome to The Forge.");
+                    btn.innerText = "Downloaded";
+                }, 1500);
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
